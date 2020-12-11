@@ -9,10 +9,16 @@ import sourcemaps from 'gulp-sourcemaps';
 // Image packages
 import imagemin from 'gulp-imagemin';
 
+// JS related packages
+import webpack from 'webpack-stream';
+import uglify from "gulp-uglify";
+
 // Utilities packages
 import del from "del";
 import gulpif from 'gulp-if';
+import named from "vinyl-named";
 import yargs from 'yargs';
+import lineec from 'gulp-line-ending-corrector';
 
 const PRODUCTION = yargs.argv.prod;
 
@@ -22,7 +28,7 @@ const config = require('./gulp.config.js');
 export const clean = () => del(["dist"]);
 
 export const styles = () => {
-  return src(config.styleSRC)
+  return src(config.styleSRC, { allowEmpty: true })
     .pipe(gulpif(!PRODUCTION, sourcemaps.init()))
     .pipe(sass({
         errLogToConsole: true,
@@ -36,6 +42,31 @@ export const styles = () => {
     .pipe(dest(config.styleDEST));
 };
 
+export const scripts = () => {
+  return src(config.scriptSRC, { allowEmpty: true })
+    .pipe(named())
+    .pipe(webpack({
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            use: {
+              loader: "babel-loader",
+              options: { presets: ["@babel/preset-env"] }
+            }
+          }
+        ]
+      },
+      output: {filename: "[name].js"},
+      externals: {jquery: "jQuery"},
+      devtool: !PRODUCTION ? "inline-source-map" : false,
+      mode: PRODUCTION ? 'production' : 'development'
+    }))
+    .pipe(gulpif(PRODUCTION, uglify()))
+    .pipe(gulpif(PRODUCTION, lineec()))
+    .pipe(dest(config.scriptDEST));
+};
+
 export const images = () => {
   return src(config.imagesSRC)
     .pipe(gulpif(PRODUCTION, imagemin()))
@@ -44,8 +75,9 @@ export const images = () => {
 
 export const watchSource = () => {
   watch('src/assets/scss/**/*.scss', styles);
-  watch(config.imagesSRC, series(images))
-  watch(config.copySRC, series(copyFiles))
+  watch(config.scriptSRC, series(scripts));
+  watch(config.imagesSRC, series(images));
+  watch(config.copySRC, series(copyFiles));
 };
 
 export const copyFiles = () => {
@@ -55,13 +87,13 @@ export const copyFiles = () => {
 
 export const dev = series(
   clean,
-  parallel(styles, images, copyFiles),
+  parallel(styles, scripts, images, copyFiles),
   watchSource
 );
 
 export const build = series(
   clean,
-  parallel(styles, images, copyFiles)
-)
+  parallel(styles, scripts, images, copyFiles)
+);
 
 export default dev;

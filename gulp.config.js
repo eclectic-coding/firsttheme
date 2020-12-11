@@ -12,5 +12,11 @@ module.exports = {
     "!src/assets/{images,js,scss}",
     "!src/assets/{images,js,scss}/**/*"
   ],
-  copyDEST: "dist/assets"
+  copyDEST: "dist/assets",
+  scriptSRC: [
+    "src/assets/js/bundle.js",
+    "src/assets/js/admin.js",
+    "src/assets/js/customize-preview.js",
+  ],
+  scriptDEST: "dist/assets/js"
 }
