@@ -7,10 +7,10 @@ module.exports = {
   styleDEST: 'dist/assets/css',
   imagesSRC: "src/assets/images/**/*.{jpg,jpeg,png,svg,gif}",
   imagesDEST: "dist/assets/images",
-  otherSRC: [
+  copySRC: [
     "src/assets/**/*",
     "!src/assets/{images,js,scss}",
     "!src/assets/{images,js,scss}/**/*"
   ],
-  otherDEST: "dist/assets"
+  copyDEST: "dist/assets"
 }

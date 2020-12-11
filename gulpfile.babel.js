@@ -9,14 +9,17 @@ import sourcemaps from 'gulp-sourcemaps';
 // Image packages
 import imagemin from 'gulp-imagemin';
 
-// Utilities
+// Utilities packages
+import del from "del";
 import gulpif from 'gulp-if';
 import yargs from 'yargs';
 
 const PRODUCTION = yargs.argv.prod;
 
 // Load paths
-const config = require('./gulp.config.js')
+const config = require('./gulp.config.js');
+
+export const clean = () => del(["dist"]);
 
 export const styles = () => {
   return src(config.styleSRC)
@@ -36,21 +39,29 @@ export const styles = () => {
 export const images = () => {
   return src(config.imagesSRC)
     .pipe(gulpif(PRODUCTION, imagemin()))
-    .pipe(dest(config.imagesDEST))
+    .pipe(dest(config.imagesDEST));
 };
 
-export const watching = () => {
+export const watchSource = () => {
   watch('src/assets/scss/**/*.scss', styles);
+  watch(config.imagesSRC, series(images))
+  watch(config.copySRC, series(copyFiles))
 };
 
 export const copyFiles = () => {
-  return src(config.otherSRC)
-    .pipe(dest(config.otherDEST));
-}
+  return src(config.copySRC)
+    .pipe(dest(config.copyDEST));
+};
 
 export const dev = series(
-  parallel(styles, images),
-  watching
+  clean,
+  parallel(styles, images, copyFiles),
+  watchSource
 );
+
+export const build = series(
+  clean,
+  parallel(styles, images, copyFiles)
+)
 
 export default dev;
