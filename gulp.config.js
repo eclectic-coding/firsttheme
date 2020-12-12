@@ -19,5 +19,22 @@ module.exports = {
     "src/assets/js/admin.js",
     "src/assets/js/customize-preview.js",
   ],
-  scriptDEST: "dist/assets/js"
+  scriptDEST: "dist/assets/js",
+  package: {
+    src: [
+      "**/*",
+      "!.idea",
+      "!node_modules{,/**}",
+      "!packaged{,/**}",
+      "!src{,/**}",
+      "!.babelrc",
+      "!.browserslistrc",
+      "!.gitignore",
+      "!gulpfile.babel.js",
+      "!gulp.config.js",
+      "!package.json",
+      "!yarn.lock",
+    ],
+    dest: "packaged"
+  }
 }

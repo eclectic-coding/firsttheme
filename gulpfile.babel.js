@@ -2,9 +2,10 @@
 import {gulp, src, dest, watch, parallel, series} from 'gulp';
 
 // CSS related packages
-import cleanCSS from 'gulp-clean-css';
 import sass from 'gulp-sass';
 import sourcemaps from 'gulp-sourcemaps';
+import autoprefixer from 'gulp-autoprefixer'
+import minifycss from 'gulp-uglifycss'
 
 // Image packages
 import imagemin from 'gulp-imagemin';
@@ -13,20 +14,21 @@ import imagemin from 'gulp-imagemin';
 import webpack from 'webpack-stream';
 
 // Utilities packages
+import browserSync from "browser-sync";
 import del from "del";
 import gulpif from 'gulp-if';
-import named from "vinyl-named";
-import yargs from 'yargs';
+import filter from 'gulp-filter'
 import lineec from 'gulp-line-ending-corrector';
+import named from "vinyl-named";
+import replace from 'gulp-replace'
+import yargs from 'yargs';
+import zip from 'gulp-zip'
 
-// Browsersync
-import browserSync from "browser-sync";
+import config from './gulp.config.js';
+import info from './package.json'
 
-const server = browserSync.create();
 const PRODUCTION = yargs.argv.prod;
-
-// Load paths
-const config = require('./gulp.config.js');
+const server = browserSync.create();
 
 export const serve = (done) => {
   server.init({
@@ -43,7 +45,7 @@ export const reload = (done) => {
 export const clean = () => del(["dist"]);
 
 export const styles = () => {
-  return src(config.styleSRC, {allowEmpty: true})
+  return src(config.styleSRC, { allowEmpty: true })
     .pipe(gulpif(!PRODUCTION, sourcemaps.init()))
     .pipe(sass({
         errLogToConsole: true,
@@ -52,10 +54,20 @@ export const styles = () => {
       })
     )
     .on("error", sass.logError)
-    .pipe(gulpif(PRODUCTION, cleanCSS()))
-    .pipe(gulpif(!PRODUCTION, sourcemaps.write()))
+    .pipe(sourcemaps.write({ includeContent: false }))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(autoprefixer())
+    .pipe(sourcemaps.write())
+    .pipe(lineec())
     .pipe(dest(config.styleDEST))
-    .pipe(server.stream());
+    .pipe(filter('**/*.css'))
+    .pipe(server.stream())
+    .pipe(gulpif(PRODUCTION, minifycss()))
+    .pipe(gulpif(PRODUCTION, lineec()))
+    .pipe(dest(config.styleDEST))
+    .pipe(filter('**/*.css'))
+    .pipe(server.stream())
+
 };
 
 export const scripts = () => {
@@ -78,16 +90,16 @@ export const scripts = () => {
       devtool: !PRODUCTION ? "inline-source-map" : false,
       mode: PRODUCTION ? 'production' : 'development'
     }))
-    .pipe(gulpif(PRODUCTION, lineec()))
+    .pipe(lineec())
     .pipe(dest(config.scriptDEST));
 };
 
 export const images = () => {
   return src(config.imagesSRC)
     .pipe(gulpif(PRODUCTION, imagemin([
-      imagemin.gifsicle({ interlaced: true }),
-      imagemin.mozjpeg({ quality: 90, progressive: true}),
-      imagemin.optipng({ optimizationLevel: 3 }),
+      imagemin.gifsicle({interlaced: true}),
+      imagemin.mozjpeg({quality: 90, progressive: true}),
+      imagemin.optipng({optimizationLevel: 3}),
       imagemin.svgo({
         plugins: [{removeViewBox: true}, {cleanupIDs: false}]
       })
@@ -98,7 +110,7 @@ export const images = () => {
 export const watchSource = () => {
   watch('src/assets/scss/**/*.scss', styles);
   watch(config.scriptSRC, series(scripts, reload));
-  watch("**/*.php", reload)
+  watch("**/*.php", reload);
   watch(config.imagesSRC, series(images, reload));
   watch(config.copySRC, series(copyFiles, reload));
 };
@@ -107,6 +119,13 @@ export const copyFiles = () => {
   return src(config.copySRC)
     .pipe(dest(config.copyDEST));
 };
+
+export const compress = () => {
+    return src(config.package.src)
+      .pipe(replace('_themename', info.name))
+      .pipe(zip(`${info.name}.zip`))
+      .pipe(dest(config.package.dest))
+}
 
 export const dev = series(
   clean,
@@ -119,5 +138,10 @@ export const build = series(
   clean,
   parallel(styles, scripts, images, copyFiles)
 );
+
+export const bundle = series(
+  build,
+  compress
+)
 
 export default dev;
