@@ -19,15 +19,31 @@ import named from "vinyl-named";
 import yargs from 'yargs';
 import lineec from 'gulp-line-ending-corrector';
 
+// Browsersync
+import browserSync from "browser-sync";
+
+const server = browserSync.create();
 const PRODUCTION = yargs.argv.prod;
 
 // Load paths
 const config = require('./gulp.config.js');
 
+export const serve = (done) => {
+  server.init({
+    proxy: config.projectURL
+  });
+  done();
+};
+
+export const reload = (done) => {
+  server.reload();
+  done();
+};
+
 export const clean = () => del(["dist"]);
 
 export const styles = () => {
-  return src(config.styleSRC, { allowEmpty: true })
+  return src(config.styleSRC, {allowEmpty: true})
     .pipe(gulpif(!PRODUCTION, sourcemaps.init()))
     .pipe(sass({
         errLogToConsole: true,
@@ -38,11 +54,12 @@ export const styles = () => {
     .on("error", sass.logError)
     .pipe(gulpif(PRODUCTION, cleanCSS()))
     .pipe(gulpif(!PRODUCTION, sourcemaps.write()))
-    .pipe(dest(config.styleDEST));
+    .pipe(dest(config.styleDEST))
+    .pipe(server.stream());
 };
 
 export const scripts = () => {
-  return src(config.scriptSRC, { allowEmpty: true })
+  return src(config.scriptSRC, {allowEmpty: true})
     .pipe(named())
     .pipe(webpack({
       module: {
@@ -51,13 +68,13 @@ export const scripts = () => {
             test: /\.js$/,
             use: {
               loader: "babel-loader",
-              options: { presets: ["@babel/preset-env"] }
+              options: {presets: ["@babel/preset-env"]}
             }
           }
         ]
       },
-      output: { filename: "[name].js" },
-      externals: { jquery: "jQuery" },
+      output: {filename: "[name].js"},
+      externals: {jquery: "jQuery"},
       devtool: !PRODUCTION ? "inline-source-map" : false,
       mode: PRODUCTION ? 'production' : 'development'
     }))
@@ -73,9 +90,10 @@ export const images = () => {
 
 export const watchSource = () => {
   watch('src/assets/scss/**/*.scss', styles);
-  watch(config.scriptSRC, series(scripts));
-  watch(config.imagesSRC, series(images));
-  watch(config.copySRC, series(copyFiles));
+  watch(config.scriptSRC, series(scripts, reload));
+  watch("**/*.php", reload)
+  watch(config.imagesSRC, series(images, reload));
+  watch(config.copySRC, series(copyFiles, reload));
 };
 
 export const copyFiles = () => {
@@ -86,6 +104,7 @@ export const copyFiles = () => {
 export const dev = series(
   clean,
   parallel(styles, scripts, images, copyFiles),
+  serve,
   watchSource
 );
 
