@@ -84,7 +84,14 @@ export const scripts = () => {
 
 export const images = () => {
   return src(config.imagesSRC)
-    .pipe(gulpif(PRODUCTION, imagemin()))
+    .pipe(gulpif(PRODUCTION, imagemin([
+      imagemin.gifsicle({ interlaced: true }),
+      imagemin.mozjpeg({ quality: 90, progressive: true}),
+      imagemin.optipng({ optimizationLevel: 3 }),
+      imagemin.svgo({
+        plugins: [{removeViewBox: true}, {cleanupIDs: false}]
+      })
+    ])))
     .pipe(dest(config.imagesDEST));
 };
 
