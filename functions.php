@@ -2,6 +2,7 @@
 
 require_once( 'lib/helpers.php' );
 require_once( 'lib/enqueue-assets.php' );
+require_once( 'lib/sidebars.php' );
 
 add_action( '_themename_after_pagination', 'after_pagination', 2 );
 /**
@@ -49,5 +50,6 @@ add_filter('_themename_no_posts_text', 'no_posts_text');
 function no_posts_text() {
 	return esc_html__('No posts', '');
 }
+
 
 ?>
