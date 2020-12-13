@@ -1,5 +1,5 @@
 module.exports = {
-  projectURL: "http://localhost:10003",
+  projectURL: "http://localhost:10008",
   styleSRC: [
     "src/assets/scss/bundle.scss",
     "src/assets/scss/admin.scss",
