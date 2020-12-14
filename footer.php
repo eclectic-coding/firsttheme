@@ -8,7 +8,7 @@ foreach ( $columns as $i => $column ) {
 	}
 }
 ?>
-
+</div>
 <?php if ( $widgets_active ) { ?>
     <?php get_template_part('template-parts/footer/widgets'); ?>
 <?php } ?>
