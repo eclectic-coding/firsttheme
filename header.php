@@ -12,6 +12,10 @@
 </head>
 <body <?php body_class(); ?>>
 
+<a href="#content" class="u-skip-link">
+    <?php esc_attr_e('Skip to content', '_themename'); ?>
+</a>
+
 <header role="banner" class="u-margin-bottom-40">
     <div class="c-header">
         <div class="o-container u-flex u-align-justify u-align-middle">
@@ -24,6 +28,14 @@
 				<?php } ?>
             </div>
 			<?php get_search_form( true ); ?>
+        </div>
+    </div>
+    <div class="c-navigation">
+        <div class="o-container">
+            <nav class="header-nav" role="navigation"
+                 aria-label="<?php esc_html_e( 'Main Navigation', '_themename' ); ?>">
+				<?php wp_nav_menu( array( 'theme_location' => 'main-menu' ) ); ?>
+            </nav>
         </div>
     </div>
 </header>
