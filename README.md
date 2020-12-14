@@ -1,0 +1,2 @@
+# README
+WordPress starter theme
