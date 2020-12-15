@@ -3,33 +3,33 @@
 /**
  * Post meta helper
  *
+ * @return void
  * @since 1.0.0
  *
- * @return void
  */
-function _themename_post_meta(){
+function _themename_post_meta() {
 	/* translators: %s: Post Date */
 	printf(
-		esc_html__( 'Posted on %s', '_themename'),
-		'<a href="' . esc_url(get_permalink( )) . '"><time datetime="' . esc_attr(get_the_date('c')) . '">' .  esc_html(get_the_date()) . '</time></a>'
+		esc_html__( 'Posted on %s', '_themename' ),
+		'<a href="' . esc_url( get_permalink() ) . '"><time datetime="' . esc_attr( get_the_date( 'c' ) ) . '">' . esc_html( get_the_date() ) . '</time></a>'
 	);
 
 	/* translators: %s: Post Author */
 	printf(
-		esc_html__(' By %s','_themename'),
-		'<a href="' . esc_url(get_author_posts_url( get_the_author_meta( 'ID' ) )) . '">' . esc_html(get_the_author( )) . '</a>'
+		esc_html__( ' By %s', '_themename' ),
+		'<a href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a>'
 	);
 }
 
 /**
  * Post read more link helper
  *
+ * @return void
  * @since 1.0.0
  *
- * @return void
  */
 function _themename_readmore_link() {
-	echo '<a class="c-post__readmore" href="' . esc_url(get_permalink()) . '" title="' . the_title_attribute(['echo' => false]) . '">';
+	echo '<a class="c-post__readmore" href="' . esc_url( get_permalink() ) . '" title="' . the_title_attribute( [ 'echo' => false ] ) . '">';
 	/* translators: %s: Post Title */
 	printf(
 		wp_kses(
@@ -43,6 +43,17 @@ function _themename_readmore_link() {
 		get_the_title()
 	);
 	echo '</a>';
+}
+
+function _themename_delete_post() {
+	$url = add_query_arg( [
+		'action' => '_themename_delete_post',
+		'post'   => get_the_ID(),
+		'nonce' => wp_create_nonce('_themename_delete_post' . get_the_ID())
+	], home_url() );
+	if ( current_user_can( 'delete_post', get_the_ID() ) ) {
+		return "<a href='" . esc_url( $url ) . "'>" . esc_html__( 'Delete Post', '_themename' ) . "</a>";
+	}
 }
 
 ?>
