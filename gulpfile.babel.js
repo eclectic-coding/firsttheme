@@ -71,7 +71,7 @@ export const styles = () => {
 };
 
 export const scripts = () => {
-  return src(config.scriptSRC, {allowEmpty: true})
+  return src(config.scriptSRC)
     .pipe(named())
     .pipe(webpack({
       module: {
