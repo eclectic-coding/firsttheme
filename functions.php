@@ -5,7 +5,7 @@ require_once( 'lib/helpers.php' );
 require_once( 'lib/enqueue-assets.php' );
 require_once( 'lib/sidebars.php' );
 require_once( 'lib/theme-supports.php' );
-require_once( 'lib/navigation.php' );
+require_once( 'lib/include-plugins.php' );
 
 add_action( 'init', '_themename_handle_delete_post' );
 function _themename_handle_delete_post() {

@@ -120,12 +120,22 @@ export const copyFiles = () => {
     .pipe(dest(config.copyDEST));
 };
 
-export const compress = () => {
-    return src(config.package.src)
-      .pipe(replace('_themename', info.name))
-      .pipe(zip(`${info.name}.zip`))
-      .pipe(dest(config.package.dest))
+export const copyPlugins = () => {
+  return src(config.plugins.src)
+    .pipe(dest(config.plugins.dest))
 }
+
+export const compress = () => {
+  return src(config.package.src)
+    .pipe(
+      gulpif(
+        file => file.relative.split(".").pop() !== "zip",
+        replace("_themename", info.name)
+      )
+    )
+    .pipe(zip(`${info.name}.zip`))
+    .pipe(dest(config.package.dest));
+};
 
 export const dev = series(
   clean,
@@ -136,12 +146,14 @@ export const dev = series(
 
 export const build = series(
   clean,
-  parallel(styles, scripts, images, copyFiles)
+  parallel(styles, scripts, images, copyFiles),
+  copyPlugins
 );
 
 export const bundle = series(
   build,
-  compress
+  compress,
+  copyPlugins
 )
 
 export default dev;

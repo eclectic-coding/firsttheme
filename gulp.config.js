@@ -36,5 +36,11 @@ module.exports = {
       "!yarn.lock",
     ],
     dest: "packaged"
+  },
+  plugins: {
+    src: [
+      "../../plugins/_themename-metaboxes/packaged/*"
+    ],
+    dest: ["lib/plugins"]
   }
 }
