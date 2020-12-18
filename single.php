@@ -21,6 +21,8 @@ if ( $layout === 'sidebar' && ! $sidebar ) {
 							}
 							?>
 
+							<?php get_template_part( 'template-parts/single/navigation' ); ?>
+
 						<?php } ?>
 					<?php } else { ?>
 						<?php get_template_part( 'template-parts/post/content', 'none' ); ?>

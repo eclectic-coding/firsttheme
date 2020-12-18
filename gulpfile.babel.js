@@ -1,11 +1,11 @@
 // Gulp packages
-import {gulp, src, dest, watch, parallel, series} from 'gulp';
+import {src, dest, watch, parallel, series} from 'gulp';
 
 // CSS related packages
 import sass from 'gulp-sass';
 import sourcemaps from 'gulp-sourcemaps';
-import autoprefixer from 'gulp-autoprefixer'
-import minifycss from 'gulp-uglifycss'
+import autoprefixer from 'gulp-autoprefixer';
+import minifycss from 'gulp-uglifycss';
 
 // Image packages
 import imagemin from 'gulp-imagemin';
@@ -17,15 +17,15 @@ import webpack from 'webpack-stream';
 import browserSync from "browser-sync";
 import del from "del";
 import gulpif from 'gulp-if';
-import filter from 'gulp-filter'
+import filter from 'gulp-filter';
 import lineec from 'gulp-line-ending-corrector';
 import named from "vinyl-named";
-import replace from 'gulp-replace'
+import replace from 'gulp-replace';
 import yargs from 'yargs';
-import zip from 'gulp-zip'
+import zip from 'gulp-zip';
 
 import config from './gulp.config.js';
-import info from './package.json'
+import info from './package.json';
 
 const PRODUCTION = yargs.argv.prod;
 const server = browserSync.create();
@@ -45,7 +45,7 @@ export const reload = (done) => {
 export const clean = () => del(["dist"]);
 
 export const styles = () => {
-  return src(config.styleSRC, { allowEmpty: true })
+  return src(config.styleSRC, {allowEmpty: true})
     .pipe(gulpif(!PRODUCTION, sourcemaps.init()))
     .pipe(sass({
         errLogToConsole: true,
@@ -54,8 +54,8 @@ export const styles = () => {
       })
     )
     .on("error", sass.logError)
-    .pipe(sourcemaps.write({ includeContent: false }))
-    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(sourcemaps.write({includeContent: false}))
+    .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(autoprefixer())
     .pipe(sourcemaps.write())
     .pipe(lineec())
@@ -66,7 +66,7 @@ export const styles = () => {
     .pipe(gulpif(PRODUCTION, lineec()))
     .pipe(dest(config.styleDEST))
     .pipe(filter('**/*.css'))
-    .pipe(server.stream())
+    .pipe(server.stream());
 
 };
 
@@ -122,8 +122,8 @@ export const copyFiles = () => {
 
 export const copyPlugins = () => {
   return src(config.plugins.src)
-    .pipe(dest(config.plugins.dest))
-}
+    .pipe(dest(config.plugins.dest));
+};
 
 export const compress = () => {
   return src(config.package.src)
@@ -154,6 +154,6 @@ export const bundle = series(
   build,
   compress,
   copyPlugins
-)
+);
 
 export default dev;
